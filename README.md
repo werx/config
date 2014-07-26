@@ -97,6 +97,15 @@ print $item;
 // Foo
 ```
 
+### Get A Default Value
+If a configuration item doesn't exist, `$config->get()` will return null. You can override the default return value by passing the new default as the 2nd parameter.
+
+```php
+$item = $config->get('doesnotexist', false);
+var_dump($item);
+// false;
+```
+
 ### Loading Environment-Specific Configuration Group
 In this example, you would be loading the array from `config.php` and `test/config.php`. Keys from `test/config.php` will replace keys with the same name from `config.php`.
 
@@ -125,7 +134,7 @@ Then to retrieve your indexed property name, tell `get()` which property group y
 
 ```
 // Get the value for the 'foo' property from the "another_config" configuration group.
-$item = $config->get('foo', 'another_config');
+$item = $config->get('foo', null, 'another_config');
 ```
 
 ## Installation

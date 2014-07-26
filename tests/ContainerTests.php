@@ -42,7 +42,7 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$this->config->clear();
 		$this->config->load(['default', 'extra'], true);
 		$this->assertEquals('default', $this->config->get('name'));
-		$this->assertEquals('Foo', $this->config->get('foo', 'extra'));
+		$this->assertEquals('Foo', $this->config->get('foo', null, 'extra'));
 	}
 
 	public function testCanLoadMultipleWithoutIndex()
@@ -57,7 +57,7 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 	{
 		$this->config->clear();
 		$this->config->load('default');
-		$this->assertEquals($this->config->default_value, $this->config->get('doesnotexist'));
+		$this->assertEquals('foo', $this->config->get('doesnotexist', 'foo'));
 	}
 
 	public function testCanGetAllConfigItems()

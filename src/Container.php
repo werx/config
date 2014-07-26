@@ -11,7 +11,6 @@ class Container
 	public $environment;
 	public $provider;
 	public $items = [];
-	public $default_value = null;
 
 	public function __construct(ProviderInterface $provider = null, $environment = null)
 	{
@@ -72,12 +71,12 @@ class Container
 		$this->items[$index_name][$key] = $value;
 	}
 
-	public function get($key, $index_name = 'default')
+	public function get($key, $default_value = null, $index_name = 'default')
 	{
 		if (array_key_exists($index_name, $this->items) && array_key_exists($key, $this->items[$index_name])) {
 			return $this->items[$index_name][$key];
 		} else {
-			return $this->default_value;
+			return $default_value;
 		}
 	}
 
