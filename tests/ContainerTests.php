@@ -60,6 +60,15 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$this->assertEquals('foo', $this->config->get('doesnotexist', 'foo'));
 	}
 
+	public function testLoadConfigShouldReturnArray()
+	{
+		$this->config->clear();
+		$config = $this->config->load('default');
+		$this->assertInternalType('array', $config);
+		$this->assertArrayHasKey('name', $config);
+		$this->assertEquals('default', $config['name']);
+	}
+
 	public function testCanGetAllConfigItems()
 	{
 		$this->config->clear();

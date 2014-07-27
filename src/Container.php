@@ -62,7 +62,8 @@ class Container
 				}
 			}
 
-			return $this->items;
+			// Return the items loaded in this call, NOT ALL the items in the config array.
+			return $items;
 		}
 	}
 
