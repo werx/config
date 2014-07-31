@@ -81,13 +81,41 @@ class Container
 		}
 	}
 
-	public function all()
+	public function all($index = null)
 	{
-		return $this->items;
+		if (empty($index)) {
+			return $this->items;
+		} elseif (array_key_exists($index, $this->items) && is_array($this->items[$index])) {
+			return $this->items[$index];
+		} else {
+			return [];
+		}
 	}
 
 	public function clear()
 	{
 		return $this->items = [];
+	}
+
+	public function __call($method, $args) {
+
+		switch(count($args)) {
+			case 2:
+				$item = $args[0];
+				$default = $args[1];
+				break;
+			case 1:
+				$item = $args[0];
+				$default = null;
+				break;
+			case 0:
+				return $this->all($method);
+			default:
+				throw new \Exception('Invalid Argument Count');
+		}
+
+		if (array_key_exists($method, $this->items)) {
+			return $this->get($item, $default, $method);
+		}
 	}
 }

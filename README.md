@@ -127,14 +127,21 @@ $config->load(['config', 'another_config']);
 By default, if a configuration property name is found in multiple config files, the config value will be replaced each time that property name is found in a config file. If you prefer, you can tell the loader to index the config container with the name of the config group to prevent name collisions. This is accomplished by passing `true` as the second parameter to `load()`.
 
 ```php
-$config->load(['config', 'another_config'], true);
+$config->load(['config', 'email'], true);
 ```
 
-Then to retrieve your indexed property name, tell `get()` which property group you are looking for when grabbing a config item.
+Then to retrieve your indexed property name, call the "magic" method named the same as the config file you loaded.
 
 ```
-// Get the value for the 'foo' property from the "another_config" configuration group.
-$item = $config->get('foo', null, 'another_config');
+// Get the value for the 'host' property from the 'email' configuration group.
+$item = $config->email('host', 'smtp.mailgun.org');
+```
+> As with the `get()` method, the seond parameter above is the default value if the config item doesn't exist.
+
+Or you can return all of the items in the 'email' config group as an array by not passing any parameters.
+
+```
+$items = $config->email();
 ```
 
 ## Installation

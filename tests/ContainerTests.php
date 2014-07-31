@@ -76,4 +76,14 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$items = $this->config->all();
 		$this->assertArrayHasKey('default', $items);
 	}
+
+	public function testCanGetItemMagicMethod()
+	{
+		$this->config->clear();
+		$this->config->load('extra', true);
+		$this->assertEquals('Foo', $this->config->extra('foo'), 'Should return "Foo"');
+		$this->assertEquals(null, $this->config->extra('doesnotexist'), 'Should return default null.');
+		$this->assertEquals(false, $this->config->extra('doesnotexist', false), 'Should return default: false.');
+		$this->assertArrayHasKey('foo', $this->config->extra(), 'Should return all items from the extra index.');
+	}
 }
