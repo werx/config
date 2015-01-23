@@ -16,7 +16,7 @@ Features:
 
 ```php
 # Get an instance of the ArrayProvider
-$provider = new \werx\Config\Provider\ArrayProvider('/path/to/config/directory');
+$provider = new \werx\Config\Providers\ArrayProvider('/path/to/config/directory');
 
 # Create a Config\Container Instance from this provider.
 $config = new \werx\Config\Container($provider);
