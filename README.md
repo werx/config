@@ -145,15 +145,10 @@ $items = $config->email();
 ```
 
 ## Installation
-This is installable and autoloadable via Composer as [werx/config](https://packagist.org/packages/werx/config). If you aren't familiar with the Composer Dependency Manager for PHP, [you should read this first](https://getcomposer.org/doc/00-intro.md).
+This package is installable and autoloadable via Composer as [werx/config](https://packagist.org/packages/werx/config). If you aren't familiar with the Composer Dependency Manager for PHP, [you should read this first](https://getcomposer.org/doc/00-intro.md).
 
-Example composer.json
-``` json
-{
-	"require": {
-		"werx/config": "dev-master"
-	}
-}
+```bash
+$ composer require werx/config --prefer-dist
 ```
 
 ## Contributing
