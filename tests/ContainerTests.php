@@ -86,4 +86,17 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(false, $this->config->extra('doesnotexist', false), 'Should return default: false.');
 		$this->assertArrayHasKey('foo', $this->config->extra(), 'Should return all items from the extra index.');
 	}
+
+	public function testCanWalkContainer()
+	{
+		$this->config->load('walk', true);
+		$this->assertEquals('dead', $this->config->walk('walkers:are','not dead'));
+		$this->assertEquals('default', $this->config->walk('default'));
+		$this->assertTrue($this->config->walk('missing', true));
+		$this->assertEquals(['name'=>'default'], $this->config->walk('alias'));
+		$this->assertEquals("default", $this->config->walk('alias:name'));
+		$this->assertEquals("could", $this->config->walk("not:that:you:would:but:you"));
+		$this->assertNull($this->config->walk("not:that:you:would:but:you:could"));
+		$this->assertEquals("forgot 'you'", $this->config->walk("not:that:would:but:you:could", "forgot 'you'"));
+	}
 }

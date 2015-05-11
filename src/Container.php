@@ -34,8 +34,9 @@ class Container
 		}
 	}
 
+
 	/** @noinspection PhpInconsistentReturnPointsInspection */
-	public function load($group = null, $index = false)
+	public function load($group = null, $index = false, $reload = true)
 	{
 
 		if (is_array($group)) {
@@ -44,6 +45,19 @@ class Container
 				$this->load($g, $index);
 			}
 		} else {
+
+			if (empty($group)) {
+				$group = 'default';
+			}
+			if ($index===true) {
+				$index_group = $group;
+			} else {
+				$index_group = 'default';
+			}
+			if (!$reload && array_key_exists($group, $this->items)) {
+				return $this->items[$group];
+			}
+
 			// First, grab any default items.
 			$default_items = $this->provider->load($group);
 
@@ -55,11 +69,7 @@ class Container
 
 			// Add this config group to our index.
 			foreach ($items as $key => $value) {
-				if ($index === true) {
-					$this->set($key, $value, $group);
-				} else {
-					$this->set($key, $value, 'default');
-				}
+				$this->set($key, $value, $index_group);
 			}
 
 			// Return the items loaded in this call, NOT ALL the items in the config array.
@@ -74,11 +84,34 @@ class Container
 
 	public function get($key, $default_value = null, $index_name = 'default')
 	{
-		if (array_key_exists($index_name, $this->items) && array_key_exists($key, $this->items[$index_name])) {
-			return $this->items[$index_name][$key];
+		if (array_key_exists($index_name, $this->items)) {
+			return $this->walkConfig($this->items[$index_name], $key, $default_value);
 		} else {
 			return $default_value;
 		}
+	}
+
+	protected function walkConfig($config, $key, $default_value)
+	{
+		$keys = explode(":", $key);
+		$result = $config;
+		foreach ($keys as $k) {
+			if (!is_array($result) || !array_key_exists($k, $result)) {
+				return $default_value;
+			}
+			$data = $result[$k];
+			if (is_string($data) && substr($data, 0, 1) === "#") {
+				if (strpos($data, ":") > 0) {
+					$group = strstr(substr($data,1),":", true);	
+					$this->load($group, true, false);
+					$data = $this->$group( substr(strstr($data,":"),1), $default_value);
+				} else {
+					$data = $this->load(substr($data,1), true, false);
+				}
+			}
+			$result = $data;
+		}
+		return $data;
 	}
 
 	public function all($index = null)
