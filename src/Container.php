@@ -65,7 +65,7 @@ class Container
 			$environment_items = $this->provider->load($group, $this->environment);
 
 			// Merge them together. Environment-specific items will replace default items.
-			$items = array_merge($default_items, $environment_items);
+			$items = self::array_merge_deep($default_items, $environment_items);
 
 			// Add this config group to our index.
 			foreach ($items as $key => $value) {
@@ -150,5 +150,35 @@ class Container
 		if (array_key_exists($method, $this->items)) {
 			return $this->get($item, $default, $method);
 		}
+	}
+
+	/**
+	 * Recursively perform an array merge, preserving keys and overriding dupes.
+	 *
+	 * Credit goes to this SO post: http://stackoverflow.com/questions/25712099/php-multidimensional-array-merge-recursive
+	 *
+	 * @param array $array1
+	 * @param array $array2
+	 * @return array
+	 */
+	public static function array_merge_deep(array $array1, array $array2)
+	{
+		$merged = $array1;
+
+		foreach ($array2 as $key => $value) {
+
+			if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
+				$merged[$key] = self::array_merge_deep($merged[$key], $value);
+			} elseif (is_numeric($key)) {
+				if ( ! in_array($value, $merged) ) {
+					$merged[] = $value;
+				}
+			} else {
+				$merged[$key] = $value;
+			}
+
+		}
+
+		return $merged;
 	}
 }
