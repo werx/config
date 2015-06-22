@@ -107,12 +107,14 @@ var_dump($item);
 ```
 
 ### Loading Environment-Specific Configuration Group
-In this example, you would be loading the array from `config.php` and `test/config.php`. Keys from `test/config.php` will replace keys with the same name from `config.php`.
+In this example, you would be loading the array from `config.php` and `test/config.php`. Keys from `test/config.php` will merge with the keys from `config.php`.
 
 ```php
 $config->setEnvironment('test');
 $config->load('config');
 ```
+
+> **Note:** The merge strategy is similar to that of PHP's native `array_merge` strategy in that keys in the environment-specific config with the same name as those in the default config replace the ones in the default.  This merge is recursive, so nested keys follow the same logic as well.
 
 ### Loading Multiple Configuration Groups
 

@@ -7,7 +7,7 @@ use werx\Config\Providers\ArrayProvider;
 class ConfigTests extends \PHPUnit_Framework_TestCase
 {
 	public $config = null;
-	
+
 	public function setUp()
 	{
 		$provider = new ArrayProvider(__DIR__ . DIRECTORY_SEPARATOR . 'resources/config_array');
@@ -25,6 +25,7 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 	{
 		$this->config->clear();
 		$this->config->load('default');
+
 		$this->assertEquals('default', $this->config->get('name'));
 	}
 
@@ -35,6 +36,26 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$this->config->load('default');
 
 		$this->assertEquals('test', $this->config->get('name'));
+	}
+
+	public function testCanLoadEnvironmentOverrideRecursive()
+	{
+		$this->config->clear();
+		$this->config->setEnvironment('test');
+		$this->config->load('default');
+
+		$recursive_values = $this->config->get('recursive_test');
+
+		// test top-level of recursive replacements
+		$this->assertEquals('new_value', $recursive_values['foo']);
+		$this->assertEquals('test', $this->config->get('name'));
+		$this->assertEquals('qux', $recursive_values['only_in_env']);
+		$this->assertEquals('baz', $recursive_values['only_in_parent']);
+
+		// test the inner recursive replacements
+		$this->assertEquals('new_value', $recursive_values['bar']['baz']);
+		$this->assertEquals('original', $recursive_values['bar']['qux']);
+		$this->assertEquals('sting', $recursive_values['bar']['bee']);
 	}
 
 	public function testCanLoadMultipleWithIndex()
@@ -89,11 +110,12 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 
 	public function testCanWalkContainer()
 	{
+		$this->config->load('default', true);
 		$this->config->load('walk', true);
 		$this->assertEquals('dead', $this->config->walk('walkers:are','not dead'));
 		$this->assertEquals('default', $this->config->walk('default'));
 		$this->assertTrue($this->config->walk('missing', true));
-		$this->assertEquals(['name'=>'default'], $this->config->walk('alias'));
+		$this->assertEquals($this->config->default(), $this->config->walk('alias'));
 		$this->assertEquals("default", $this->config->walk('alias:name'));
 		$this->assertEquals("could", $this->config->walk("not:that:you:would:but:you"));
 		$this->assertNull($this->config->walk("not:that:you:would:but:you:could"));
