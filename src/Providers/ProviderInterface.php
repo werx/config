@@ -2,11 +2,13 @@
 
 namespace werx\Config\Providers;
 
+use \werx\Config\Container;
+
 interface ProviderInterface
 {
 	/**
-	 * @string $group
-	 * @string null $environment
+	 * @param string $group
+	 * @param string|null $environment
 	 */
 	public function load($group, $environment = null);
 }
