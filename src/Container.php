@@ -23,7 +23,6 @@ class Container
 		if (empty($provider)) {
 			$provider = new Providers\ArrayProvider();
 		}
-
 		$this->provider = $provider;
 	}
 
@@ -85,9 +84,9 @@ class Container
 	public function get($key, $default_value = null, $index_name = 'default')
 	{
 		if (array_key_exists($index_name, $this->items)) {
-			return $this->walkConfig($this->items[$index_name], $key, $default_value);
+			return $this->evaluate($this->walkConfig($this->items[$index_name], $key, $default_value));
 		} else {
-			return $default_value;
+			return $this->evaluate($default_value);
 		}
 	}
 
@@ -102,7 +101,7 @@ class Container
 			$data = $result[$k];
 			if (is_string($data) && substr($data, 0, 1) === "#") {
 				if (strpos($data, ":") > 0) {
-					$group = strstr(substr($data,1),":", true);	
+					$group = strstr(substr($data,1),":", true);
 					$this->load($group, true, false);
 					$data = $this->$group( substr(strstr($data,":"),1), $default_value);
 				} else {
@@ -180,5 +179,11 @@ class Container
 		}
 
 		return $merged;
+	}
+
+	private function evaluate($value)
+	{
+		$invokable = is_object($value) && method_exists($value,'__invoke') || is_callable($value);
+		return $invokable ? $value($this) : $value;
 	}
 }

@@ -5,8 +5,8 @@ namespace werx\Config\Providers;
 interface ProviderInterface
 {
 	/**
-	 * @string $group
-	 * @string null $environment
+	 * @param string $group
+	 * @param string|null $environment
 	 */
 	public function load($group, $environment = null);
 }
