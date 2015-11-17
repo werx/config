@@ -25,5 +25,10 @@
 			"werx\\Config\\": "src/",
 			"werx\\Config\\Providers\\": "src/Providers"
 		}
+	}, 
+	"autoload-dev":	{
+		"psr-4": {
+			"werx\\Config\\Tests\\": "Tests/"
+		}
 	}
 }

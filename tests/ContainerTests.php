@@ -121,4 +121,31 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$this->assertNull($this->config->walk("not:that:you:would:but:you:could"));
 		$this->assertEquals("forgot 'you'", $this->config->walk("not:that:would:but:you:could", "forgot 'you'"));
 	}
+
+	public function testCanUseCallable()
+	{
+		$this->config->load('callable');
+		$this->assertEquals('default', $this->config->get('foo'));
+	}
+
+	public function testCanUseCallableDefault()
+	{
+		$this->config->load('callable');
+		$this->assertEquals('default', $this->config->get('doesnotexist', function() { return "default"; }));
+	}
+
+	public function testCanUseCallableSingleton()
+	{
+		$this->config->load('callable');
+		$bar = $this->config->get('bar');
+		$this->assertTrue($bar === $this->config->get('bar'));
+	}
+
+	public function testCanUseCallableNotSingleton()
+	{
+		$this->config->load('callable');
+		$bar = $this->config->get('bar2');
+		$this->assertTrue($bar !== $this->config->get('bar2'));
+	}
+
 }

@@ -55,4 +55,16 @@ class ArrayProvider implements ProviderInterface
 			return $this->path . DIRECTORY_SEPARATOR . basename($file, '.php') . '.php';
 		}
 	}
+
+	protected function singleton(callable $factory)
+	{
+		$singleton_factory = function ($container) use($factory) {
+			static $instance;
+			if ($instance === null) {
+				$instance = $factory($container);
+			}
+			return $instance;
+		};
+		return $singleton_factory;
+	}
 }
