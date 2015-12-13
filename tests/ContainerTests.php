@@ -6,6 +6,9 @@ use werx\Config\Providers\ArrayProvider;
 
 class ConfigTests extends \PHPUnit_Framework_TestCase
 {
+	/**
+	 * @var \werx\Config\Container
+	 */
 	public $config = null;
 
 	public function setUp()
@@ -18,14 +21,23 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 	{
 		$config = new Container;
 
-		$this->assertInstanceOf('werx\Config\Providers\ArrayProvider', $config->provider, 'Should default to array provider if no provider specified.');
+		$this->assertInstanceOf(
+			'werx\Config\Providers\ArrayProvider',
+			$config->provider,
+			'Should default to array provider if no provider specified.'
+		);
 	}
 
 	public function testCanLoadDefault()
 	{
-		$this->config->clear();
 		$this->config->load('default');
 
+		$this->assertEquals('default', $this->config->get('name'));
+	}
+
+	public function testLoadEmptyGroupShouldLoadDefault()
+	{
+		$this->config->load(null);
 		$this->assertEquals('default', $this->config->get('name'));
 	}
 
@@ -108,11 +120,21 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$this->assertArrayHasKey('foo', $this->config->extra(), 'Should return all items from the extra index.');
 	}
 
+	/**
+	 * @expectedException \BadMethodCallException
+	 */
+	public function testMagicMethodShouldThrowException()
+	{
+		// More than 2 arguements should throw an exception.
+		$this->config->foo('key', null, null);
+
+	}
+
 	public function testCanWalkContainer()
 	{
 		$this->config->load('default', true);
 		$this->config->load('walk', true);
-		$this->assertEquals('dead', $this->config->walk('walkers:are','not dead'));
+		$this->assertEquals('dead', $this->config->walk('walkers:are', 'not dead'));
 		$this->assertEquals('default', $this->config->walk('default'));
 		$this->assertTrue($this->config->walk('missing', true));
 		$this->assertEquals($this->config->default(), $this->config->walk('alias'));
@@ -131,7 +153,15 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 	public function testCanUseCallableDefault()
 	{
 		$this->config->load('callable');
-		$this->assertEquals('default', $this->config->get('doesnotexist', function() { return "default"; }));
+		$this->assertEquals(
+			'default',
+			$this->config->get(
+				'doesnotexist',
+				function () {
+					return "default";
+				}
+			)
+		);
 	}
 
 	public function testCanUseCallableSingleton()
@@ -148,4 +178,106 @@ class ConfigTests extends \PHPUnit_Framework_TestCase
 		$this->assertTrue($bar !== $this->config->get('bar2'));
 	}
 
+	public function testShouldNotHaveKey()
+	{
+		$this->config->clear();
+		$this->config->set('foo', 'Foo');
+
+		$this->assertFalse($this->config->has('bar'));
+		$this->assertFalse($this->config->has('default.bar'));
+		$this->assertFalse($this->config->has('bar', 'default'));
+	}
+
+	public function testShouldHaveHaveKey()
+	{
+		$this->config->clear();
+		$this->config->set('bar', 'Bar');
+
+		$this->assertTrue($this->config->has('bar'));
+		$this->assertTrue($this->config->has('default.bar'));
+		$this->assertTrue($this->config->has('bar', 'default'));
+	}
+
+	public function testCanGetArrayAccess()
+	{
+		$this->config->clear();
+		$this->config->set('foo', 'Foo', 'test');
+
+		$this->assertEquals('Foo', $this->config['test.foo']);
+	}
+
+	public function testCanSetArrayAccessCompoundKey()
+	{
+		$this->config->clear();
+		$this->config['test.foo'] = 'Foo';
+
+		$this->assertEquals('Foo', $this->config['test.foo'], 'Get via array access');
+		$this->assertEquals('Foo', $this->config->get('test.foo'), 'Get via method With Compound Key');
+		$this->assertEquals('Foo', $this->config->get('foo', null, 'test'), 'Get via method with index param');
+		$this->assertEquals('Foo', $this->config->test('foo'), 'Get via magic method');
+	}
+
+	public function testCanForgetItem()
+	{
+		$this->config->clear();
+		$this->config['test.foo'] = 'Foo';
+		$this->assertTrue($this->config->has('test.foo'));
+
+		$this->config->forget('test.foo');
+		$this->assertFalse($this->config->has('test.foo'));
+
+	}
+
+	public function testCanRemoveItemArrayAccess()
+	{
+		$this->config->clear();
+		$this->config['test.foo'] = 'Foo';
+		$this->assertTrue($this->config->has('test.foo'));
+
+		unset($this->config['test.foo']);
+
+		$this->assertFalse($this->config->has('test.foo'));
+	}
+
+	public function testArrayKeyShouldExist()
+	{
+		$this->config->clear();
+		$this->config['test.foo'] = 'Foo';
+		$this->assertTrue(isset($this->config['test.foo']));
+		$this->assertFalse(empty($this->config['test.foo']));
+	}
+
+	public function testCanSetWithAddAlias()
+	{
+		$this->config->clear();
+		$this->config->add('foo', 'Foo', 'test');
+
+		$this->assertEquals('Foo', $this->config->get('test.foo'));
+	}
+
+	public function testCanEvaluateUnsetDefault()
+	{
+		$this->config->clear();
+		$result = $this->config->get('foo', 'Foo', 'doesnotexist');
+
+		$this->assertEquals('Foo', $result);
+	}
+
+	public function testAllWithNonexistantIndexShouldReturnEmptyArray()
+	{
+		$this->config->clear();
+		$this->assertEquals([], $this->config->all('indexdoesnotexist'));
+	}
+
+	public function testArrayMergeDeepReturnsExpectedResultNumericIndex()
+	{
+		$array_1 = ['foo' => 'Foo'];
+		$array_2 = [0 => 'Numeric Index'];
+
+		$merged = Container::array_merge_deep($array_1, $array_2);
+
+		$this->assertTrue(in_array('Numeric Index', $merged));
+		$this->assertArrayHasKey('foo', $merged);
+		$this->assertEquals('Foo', $merged['foo']);
+	}
 }
